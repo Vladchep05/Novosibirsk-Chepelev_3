@@ -13,6 +13,8 @@ class CoffeeApp(QtWidgets.QMainWindow):
 
         self.pushButton.clicked.connect(self.show_coffee_info)
 
+        self.btnAddEditCoffee.clicked.connect(self.open_add_edit_window)
+
         self.show()
 
     def show_coffee_info(self):
@@ -20,17 +22,50 @@ class CoffeeApp(QtWidgets.QMainWindow):
         self.cursor.execute(query)
         result = self.cursor.fetchall()
 
-        self.textBrowser.clear()
-
+        self.text_browser.clear()
         for row in result:
-            self.textBrowser.append(f"ID: {row[0]}")
-            self.textBrowser.append(f"Название сорта: {row[1]}")
-            self.textBrowser.append(f"Степень обжарки: {row[2]}")
-            self.textBrowser.append(f"Молотый/в зернах: {row[3]}")
-            self.textBrowser.append(f"Описание вкуса: {row[4]}")
-            self.textBrowser.append(f"Цена: {row[5]}")
-            self.textBrowser.append(f"Объем упаковки: {row[6]}")
-            self.textBrowser.append("-" * 50)
+            self.text_browser.append(f"ID: {row[0]}")
+            self.text_browser.append(f"Название сорта: {row[1]}")
+            self.text_browser.append(f"Степень обжарки: {row[2]}")
+            self.text_browser.append(f"Молотый/в зернах: {row[3]}")
+            self.text_browser.append(f"Описание вкуса: {row[4]}")
+            self.text_browser.append(f"Цена: {row[5]}")
+            self.text_browser.append(f"Объем упаковки: {row[6]}")
+            self.text_browser.append("-" * 50)
+
+    def open_add_edit_window(self):
+        self.addEditWindow = AddEditCoffeeWindow()
+        self.addEditWindow.show()
+
+
+class AddEditCoffeeWindow(QtWidgets.QWidget):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('addEditCoffeeForm.ui', self)
+
+        self.saveButton.clicked.connect(self.save_coffee)
+
+    def save_coffee(self):
+        name = self.nameLineEdit.text()
+        roast = self.roastLineEdit.text()
+        coffee_type = self.typeLineEdit.text()
+        description = self.descriptionLineEdit.text()
+        price = self.priceLineEdit.text()
+        volume = self.volumeLineEdit.text()
+
+        if name and roast and coffee_type and description and price and volume:
+            connection = sqlite3.connect('coffee.sqlite')
+            cursor = connection.cursor()
+            query = """INSERT INTO coffee (name, roast, type, description, price, volume) 
+                    VALUES (?, ?, ?, ?, ?, ?)"""
+            cursor.execute(query, (name, roast, coffee_type, description, price, volume))
+
+            connection.commit()
+
+            cursor.close()
+            connection.close()
+
+            self.close()
 
 
 def except_hook(cls, exception, traceback):
