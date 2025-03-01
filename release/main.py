@@ -1,18 +1,21 @@
 import sqlite3
 import sys
-from PyQt5 import QtWidgets, uic
+import os
+from PyQt5 import QtWidgets, QtCore
+from addEditCoffeeForm import Ui_tasteDescriptionLineEdit
+from dop import Ui_Form
 
 
-class CoffeeApp(QtWidgets.QMainWindow):
+class CoffeeApp(QtWidgets.QMainWindow, Ui_Form):
     def __init__(self):
         super().__init__()
-        uic.loadUi('main.ui', self)
-
-        self.conn = sqlite3.connect('coffee.sqlite')
+        self.setupUi(self)
+        self.conn = sqlite3.connect(
+            os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data'), 'coffee.sqlite')
+        )
         self.cursor = self.conn.cursor()
 
         self.pushButton.clicked.connect(self.show_coffee_info)
-
         self.btnAddEditCoffee.clicked.connect(self.open_add_edit_window)
 
         self.show()
@@ -38,10 +41,10 @@ class CoffeeApp(QtWidgets.QMainWindow):
         self.addEditWindow.show()
 
 
-class AddEditCoffeeWindow(QtWidgets.QWidget):
+class AddEditCoffeeWindow(QtWidgets.QWidget, Ui_tasteDescriptionLineEdit):
     def __init__(self):
         super().__init__()
-        uic.loadUi('addEditCoffeeForm.ui', self)
+        self.setupUi(self)
 
         self.saveButton.clicked.connect(self.save_coffee)
 
@@ -54,7 +57,9 @@ class AddEditCoffeeWindow(QtWidgets.QWidget):
         volume = self.volumeLineEdit.text()
 
         if name and roast and coffee_type and description and price and volume:
-            connection = sqlite3.connect('coffee.sqlite')
+            connection = sqlite3.connect(
+                os.path.join(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data'), 'coffee.sqlite')
+            )
             cursor = connection.cursor()
             query = """INSERT INTO coffee (name, roast, type, description, price, volume) 
                     VALUES (?, ?, ?, ?, ?, ?)"""
